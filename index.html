@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Mali:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400;1,500;1,600;1,700&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Nanum+Brush+Script&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+        *{
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body, html{
+            position: relative;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        body{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .canvas{
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 1092px;
+            height: 614px;
+            /* border: 2px;
+            border-color: purple;
+            border-style: dashed; */
+        }
+
+        .date-time{
+            width: 155px;
+            height: 30px;
+            padding: 5px 10px 5px 10px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border-bottom-left-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-weight: 500;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+        .local-weather{
+            width: fit-content;
+            height: 30px;
+            padding: 5px 10px 5px 10px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            /* position: absolute;
+            top: 2px;
+            left: 2px; */
+            font-weight: 500;
+            letter-spacing: 1px;
+            font-size: 14px;
+        }
+    </style>
+    <title>Teste OBS</title>
+</head>
+<body>
+    <div class="canvas">
+        <div class="date-time">
+            <p id="data"></p>
+            <p id="Hora"></p>
+        </div>
+        <div class="local-weather">
+            <p id="temperatura"></p>
+        </div>
+    </div>
+</body>
+<script>
+    function atualizarHora() {
+        // Obtém a data e hora atuais
+        const dataHoraAtual = new Date();
+
+        // Extrai os componentes de data e hora
+        const dia = dataHoraAtual.getDate();
+        const mes = dataHoraAtual.getMonth() + 1; // Os meses em JavaScript são indexados a partir de 0
+        const ano = dataHoraAtual.getFullYear().toString().slice(-2);
+        const hora = dataHoraAtual.getHours();
+        const minutos = dataHoraAtual.getMinutes();
+        const segundos = dataHoraAtual.getSeconds();
+
+        // Formatação para garantir que os números tenham sempre dois dígitos
+        const diaFormatado = dia < 10 ? `0${dia}` : dia;
+        const mesFormatado = mes < 10 ? `0${mes}` : mes;
+        const horaFormatada = hora < 10 ? `0${hora}` : hora;
+        const minutosFormatados = minutos < 10 ? `0${minutos}` : minutos;
+        const segundosFormatados = segundos < 10 ? `0${segundos}` : segundos;
+
+        // Cria uma string com a data e hora formatadas
+        const dataFormatada = `${diaFormatado}-${mesFormatado}-${ano}`;
+        const HoraFormatada = `${horaFormatada}:${minutosFormatados}`;
+
+        // Obtém o elemento HTML onde queremos mostrar a data e hora
+        const elementoData = document.getElementById('data');
+        const elementoHora = document.getElementById('Hora');
+
+        // Define o conteúdo do elemento com a data e hora formatada
+        elementoData.textContent = dataFormatada;
+        elementoHora.textContent = HoraFormatada;
+    }
+
+    // Atualiza a hora inicialmente e então define um intervalo para atualizar a cada segundo
+    atualizarHora();
+    setInterval(atualizarHora, 1000); // Atualiza a cada 1000 milissegundos (1 segundo)
+
+     // Função para atualizar a localização e a temperatura
+    function atualizarLocalizacaoETemperatura() {
+        // Obtém a localização atual usando a API de Geolocalização
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            // Chave da API da OpenWeatherMap
+            const apiKey = 'cedf963f250a61edde211f5bed61b43d';
+
+            // Monta a URL da API de previsão do tempo
+            const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
+
+            // Faz uma requisição à API de previsão do tempo
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const temperatura = data.main.temp.toFixed(0);
+
+                    // Exibe a cidade e a temperatura no elemento HTML
+                    document.getElementById('temperatura').textContent = `${temperatura}°C`;
+                })
+                .catch(error => {
+                    console.error('Erro ao obter os dados da API:', error);
+                });
+        });
+    }
+
+    // Chama a função para atualizar a localização e a temperatura
+    atualizarLocalizacaoETemperatura();
+    setInterval(atualizarLocalizacaoETemperatura, 300000); // Atualiza a cada 1000 milissegundos (1 segundo)
+</script>
+</html>
